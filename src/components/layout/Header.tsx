@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
+import { LogOut } from 'lucide-react';
 import Button from '@/components/ui/Button';
 
 const Header: React.FC = () => {
@@ -36,18 +37,14 @@ const Header: React.FC = () => {
               >
                 Dashboard
               </Link>
-              <Link 
-                to="/search" 
-                className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
-              >
-                Find Tutors
-              </Link>
-              <Link 
-                to="/schedule" 
-                className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
-              >
-                Schedule
-              </Link>
+              {user?.role === 'tutee' && (
+                <Link 
+                  to="/search" 
+                  className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+                >
+                  Find Tutors
+                </Link>
+              )}
               <Link 
                 to="/resources" 
                 className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
@@ -75,7 +72,13 @@ const Header: React.FC = () => {
                   </div>
                 </Link>
               </div>
-              <Button onClick={handleLogout} variant="outline" size="sm">
+              <Button 
+                onClick={handleLogout} 
+                variant="outline" 
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
                 Logout
               </Button>
             </>
