@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
 import { Button } from '@/components/ui/buttonShadcn';
-import { getTutorSessions, getTuteeSessions, getSessionFeedback } from '@/lib/mock-data';
+import { getTutorSessions, getTuteeSessions } from '@/lib/mock-data';
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -38,10 +37,6 @@ const Dashboard: React.FC = () => {
     (session.status === 'confirmed' || session.status === 'requested')
   );
   
-  const sessionRequests = user.role === 'tutor' 
-    ? sessions.filter(session => session.status === 'requested')
-    : [];
-  
   return (
     <Layout>
       <div className="container px-4 py-8 mx-auto md:px-6">
@@ -53,6 +48,7 @@ const Dashboard: React.FC = () => {
         </p>
         
         <div className="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 lg:grid-cols-3">
+          {/* Quick Actions */}
           <div className="p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-xl font-semibold">Quick Actions</h2>
             <div className="mt-4 space-y-3">
@@ -122,81 +118,6 @@ const Dashboard: React.FC = () => {
               <p className="mt-4 text-gray-600">No upcoming sessions.</p>
             )}
           </div>
-          
-          {user.role === 'tutor' && (
-            <div className="p-6 bg-white rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold">Session Requests</h2>
-              {sessionRequests.length > 0 ? (
-                <div className="mt-4 space-y-3">
-                  {sessionRequests.map((session) => (
-                    <div key={session.id} className="p-3 border rounded-md">
-                      <div>
-                        <p className="font-medium">{session.subject.name}</p>
-                        <p className="text-sm text-gray-600">
-                          {new Date(session.dateTime).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="flex mt-2 space-x-2">
-                        <Button size="sm" className="w-full">Accept</Button>
-                        <Button size="sm" variant="outline" className="w-full">Decline</Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="mt-4 text-gray-600">No pending requests.</p>
-              )}
-            </div>
-          )}
-          
-          {user.role === 'tutee' && (
-            <div className="p-6 bg-white rounded-lg shadow-md">
-              <h2 className="text-xl font-semibold">Recommended Tutors</h2>
-              <div className="mt-4 space-y-3">
-                {/* Mock recommended tutors */}
-                <div className="p-3 border rounded-md">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <img 
-                        className="w-10 h-10 rounded-full" 
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-                        alt="John Doe"
-                      />
-                    </div>
-                    <div className="ml-3">
-                      <p className="font-medium">John Doe</p>
-                      <p className="text-sm text-gray-600">Mathematics, Physics</p>
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <Link to="/profile/1">
-                      <Button size="sm" className="w-full">View Profile</Button>
-                    </Link>
-                  </div>
-                </div>
-                <div className="p-3 border rounded-md">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <img 
-                        className="w-10 h-10 rounded-full" 
-                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-                        alt="Jane Smith"
-                      />
-                    </div>
-                    <div className="ml-3">
-                      <p className="font-medium">Jane Smith</p>
-                      <p className="text-sm text-gray-600">Computer Science</p>
-                    </div>
-                  </div>
-                  <div className="mt-2">
-                    <Link to="/profile/2">
-                      <Button size="sm" className="w-full">View Profile</Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
         
         <div className="mt-8">

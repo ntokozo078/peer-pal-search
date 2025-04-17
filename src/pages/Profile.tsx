@@ -1,12 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
-import { tutors, tutees, findUserById, getSessionFeedback } from '@/lib/mock-data';
+import { findUserById, getSessionFeedback } from '@/lib/mock-data';
 import { User, TutorProfile, TuteeProfile, Feedback } from '@/types';
 import { Button } from '@/components/ui/buttonShadcn';
-import { CalendarDaysIcon, BookOpenIcon, UserIcon, GraduationCap, StarIcon } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { toast } from '@/components/ui/use-toast';
+import { CalendarDaysIcon, BookOpenIcon, UserIcon, GraduationCap, StarIcon, Save } from 'lucide-react';
 
 const Profile: React.FC = () => {
   const { userId } = useParams();
@@ -14,53 +15,52 @@ const Profile: React.FC = () => {
   const navigate = useNavigate();
   
   const [profileUser, setProfileUser] = useState<User | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [editedBio, setEditedBio] = useState('');
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   
   useEffect(() => {
-    // Determine if this is the user's own profile or someone else's
     let userToShow: User | null = null;
     
     if (userId) {
-      // Viewing someone else's profile
       userToShow = findUserById(userId);
       setIsOwnProfile(false);
     } else if (user) {
-      // Viewing own profile
       userToShow = user;
       setIsOwnProfile(true);
     }
     
     if (userToShow) {
       setProfileUser(userToShow);
+      setEditedName(userToShow.name);
+      setEditedBio(userToShow.bio || '');
       
-      // If this is a tutor, we want to fetch their feedback
       if (userToShow.role === 'tutor') {
-        const mockFeedback = [
-          {
-            id: "f1",
-            sessionId: "s1",
-            fromId: "101",
-            toId: userToShow.id,
-            rating: 5,
-            comment: "Excellent tutor! Made complex concepts easy to understand.",
-            createdAt: new Date("2023-03-15")
-          },
-          {
-            id: "f2",
-            sessionId: "s2",
-            fromId: "102",
-            toId: userToShow.id,
-            rating: 4,
-            comment: "Very helpful and patient. Would recommend.",
-            createdAt: new Date("2023-03-10")
-          }
-        ];
-        setFeedbacks(mockFeedback);
+        const tutorFeedback = getSessionFeedback(userToShow.id);
+        setFeedbacks(tutorFeedback);
       }
     }
   }, [userId, user]);
-  
+
+  const handleSaveProfile = () => {
+    if (!profileUser) return;
+    
+    // In a real app, this would make an API call to update the profile
+    setProfileUser({
+      ...profileUser,
+      name: editedName,
+      bio: editedBio,
+    });
+    
+    setIsEditing(false);
+    toast({
+      title: "Success",
+      description: "Profile updated successfully",
+    });
+  };
+
   if (!profileUser) {
     return (
       <Layout>
@@ -77,79 +77,91 @@ const Profile: React.FC = () => {
   }
   
   const isTutor = profileUser.role === 'tutor';
-  const tutorProfile = isTutor ? tutors.find(t => t.id === profileUser.id) as TutorProfile : null;
-  const tuteeProfile = !isTutor ? tutees.find(t => t.id === profileUser.id) as TuteeProfile : null;
-  
+  const tutorProfile = isTutor ? {
+    subjects: [],
+    qualifications: [],
+    availability: [],
+    hourlyRate: 0,
+    rating: 0,
+    reviewCount: 0,
+  } as TutorProfile : null;
+  const tuteeProfile = !isTutor ? {
+    interests: [],
+    learningPreferences: [],
+  } as TuteeProfile : null;
+
   return (
     <Layout>
       <div className="container px-4 py-8 mx-auto">
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-8 sm:flex sm:items-center sm:justify-between">
-            <div className="sm:flex sm:items-center">
-              <div className="sm:flex-shrink-0">
-                <img 
-                  className="h-24 w-24 rounded-full object-cover" 
-                  src={profileUser.profilePicture || '/placeholder.svg'} 
-                  alt={profileUser.name} 
-                />
-              </div>
-              <div className="mt-4 sm:mt-0 sm:ml-8">
-                <div className="flex items-center">
-                  <h1 className="text-3xl font-bold text-gray-900">{profileUser.name}</h1>
-                  {isTutor && (
-                    <div className="ml-4 flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <StarIcon 
-                          key={i}
-                          className={`w-5 h-5 ${
-                            i < Math.floor(tutorProfile?.rating || 0) 
-                              ? 'text-yellow-400 fill-current' 
-                              : 'text-gray-300'
-                          }`} 
-                        />
-                      ))}
-                      <span className="ml-1 text-sm text-gray-600">
-                        {tutorProfile?.rating} ({tutorProfile?.reviewCount} reviews)
-                      </span>
-                    </div>
-                  )}
+          <div className="p-8">
+            <div className="sm:flex sm:items-center sm:justify-between">
+              <div className="sm:flex sm:items-center">
+                <div className="sm:flex-shrink-0">
+                  <img 
+                    className="h-24 w-24 rounded-full object-cover" 
+                    src={profileUser.profilePicture || '/placeholder.svg'} 
+                    alt={profileUser.name} 
+                  />
                 </div>
-                <p className="mt-2 text-gray-600">
-                  {isTutor 
-                    ? "Tutor"
-                    : "Student"
-                  }
-                </p>
-                <p className="mt-1 text-sm text-gray-500">
-                  Member since {new Date(profileUser.createdAt).toLocaleDateString()}
-                </p>
+                <div className="mt-4 sm:mt-0 sm:ml-8">
+                  {isEditing ? (
+                    <Input
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      className="text-xl font-bold"
+                    />
+                  ) : (
+                    <h1 className="text-3xl font-bold text-gray-900">{profileUser.name}</h1>
+                  )}
+                  <p className="mt-2 text-gray-600">
+                    {profileUser.role === 'tutor' ? "Tutor" : "Student"}
+                  </p>
+                </div>
               </div>
-            </div>
-            
-            <div className="mt-6 sm:mt-0">
-              {isOwnProfile ? (
-                <Button onClick={() => navigate('/profile/edit')}>
-                  Edit Profile
-                </Button>
-              ) : isTutor ? (
-                <Button onClick={() => navigate(`/schedule/${profileUser.id}`)}>
-                  Book Session
-                </Button>
-              ) : (
-                <Button variant="outline" onClick={() => navigate('/dashboard')}>
-                  Back to Dashboard
-                </Button>
-              )}
+              
+              <div className="mt-6 sm:mt-0">
+                {isOwnProfile ? (
+                  isEditing ? (
+                    <Button onClick={handleSaveProfile}>
+                      <Save className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </Button>
+                  ) : (
+                    <Button onClick={() => setIsEditing(true)}>
+                      Edit Profile
+                    </Button>
+                  )
+                ) : (
+                  <Button onClick={() => navigate('/messages')}>
+                    Send Message
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-          
+
+          {/* Bio Section */}
+          <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
+            <h2 className="text-xl font-semibold">About</h2>
+            {isEditing ? (
+              <Input
+                value={editedBio}
+                onChange={(e) => setEditedBio(e.target.value)}
+                className="mt-2"
+                placeholder="Tell us about yourself..."
+              />
+            ) : (
+              <p className="mt-2 text-gray-600">
+                {profileUser.bio || "No bio provided."}
+              </p>
+            )}
+          </div>
+
           <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <h2 className="text-xl font-semibold">About</h2>
-                <p className="mt-2 text-gray-600">
-                  {profileUser.bio || "No bio provided."}
-                </p>
+                
                 
                 {isTutor && (
                   <>

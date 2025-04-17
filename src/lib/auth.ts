@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { User, UserRole } from '@/types';
-import { findUserByEmail, tutors, tutees } from './mock-data';
+import { findUserByEmail } from './mock-data';
 
 interface AuthState {
   user: User | null;
@@ -24,12 +24,12 @@ export const useAuth = create<AuthState>((set) => ({
     set({ loading: true, error: null });
     
     try {
-      // Simulate API call
+      // In a real app, this would make an API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const user = findUserByEmail(email);
       
-      if (user && password === 'password') { // Simple mock password check
+      if (user && password === 'password') { // In a real app, this would properly verify the password
         set({ user, isAuthenticated: true, loading: false });
         return true;
       } else {
@@ -46,10 +46,8 @@ export const useAuth = create<AuthState>((set) => ({
     set({ loading: true, error: null });
     
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Check if user already exists
       const existingUser = findUserByEmail(email);
       
       if (existingUser) {
@@ -59,15 +57,14 @@ export const useAuth = create<AuthState>((set) => ({
       
       // Create a new user
       const newUser: User = {
-        id: `new-${Date.now()}`,
+        id: `user-${Date.now()}`,
         email,
         name,
         role,
         createdAt: new Date(),
+        bio: '',
       };
       
-      // In a real app, we would save the user to the database
-      // Here we're just setting the state
       set({ user: newUser, isAuthenticated: true, loading: false });
       return true;
     } catch (error) {
