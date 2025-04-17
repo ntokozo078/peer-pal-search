@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
@@ -13,7 +12,8 @@ const Resources: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   
-  // Filter resources based on selected subject and search query
+  const availableSubjects = getAllSubjects();
+  
   const filteredResources = resources.filter(resource => {
     const matchesSubject = selectedSubject === 'all' || resource.subject.id === selectedSubject;
     const matchesSearch = resource.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -82,9 +82,9 @@ const Resources: React.FC = () => {
                 onChange={(e) => setSelectedSubject(e.target.value)}
               >
                 <option value="all">All Subjects</option>
-                {subjects.map((subject) => (
+                {availableSubjects.map((subject) => (
                   <option key={subject.id} value={subject.id}>
-                    {subject.name} ({subject.level})
+                    {subject.name} ({subject.level}) - ${subject.hourlyRate}/hr
                   </option>
                 ))}
               </select>

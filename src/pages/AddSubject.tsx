@@ -59,8 +59,7 @@ const AddSubject: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate inputs
-    if (!subjectName || !level || !hourlyRate) {
+    if (!subjectName || !level || !hourlyRate || !user) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields",
@@ -81,13 +80,21 @@ const AddSubject: React.FC = () => {
     
     setIsSubmitting(true);
     
-    // Simulate saving
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const newSubject: Subject = {
+      id: `subject-${Date.now()}`,
+      name: subjectName,
+      level,
+      tutorId: user.id,
+      hourlyRate: rate,
+      description: description
+    };
+    
+    // Add to mock data
+    subjects.push(newSubject);
     
     toast({
       title: "Subject Added",
       description: `${subjectName} (${level}) has been added to your profile.`,
-      variant: "default"
     });
     
     setIsSubmitting(false);

@@ -35,6 +35,22 @@ export const userCredentials: UserCredential[] = [
 ];
 
 // Seed some test users
+const testSubjects: Subject[] = [{
+  id: "math-101",
+  name: "Mathematics",
+  level: "Advanced",
+  tutorId: "user-test-tutor",
+  hourlyRate: 150,
+}, {
+  id: "phys-101",
+  name: "Physics",
+  level: "Intermediate",
+  tutorId: "user-test-tutor",
+  hourlyRate: 130,
+}];
+
+subjects.push(...testSubjects);
+
 const testTutor: TutorProfile = {
   id: "user-test-tutor",
   email: "test@test.com",
@@ -42,15 +58,7 @@ const testTutor: TutorProfile = {
   role: "tutor",
   createdAt: new Date(),
   bio: "Experienced tutor in mathematics and physics",
-  subjects: [{
-    id: "math-101",
-    name: "Mathematics",
-    description: "Advanced mathematics"
-  }, {
-    id: "phys-101",
-    name: "Physics",
-    description: "Physics fundamentals"
-  }],
+  subjects: subjects.filter(s => s.tutorId === "user-test-tutor"),
   hourlyRate: 150,
   availability: [{
     day: "Monday",
@@ -66,7 +74,7 @@ const testTutor: TutorProfile = {
     endTime: "17:00"
   }],
   rating: 4.8,
-  sessions: 24,
+  reviewCount: 24,
 };
 
 const testTutee: TuteeProfile = {
@@ -132,6 +140,14 @@ export function getTutorResources(tutorId: string) {
 
 export function getSessionFeedback(sessionId: string) {
   return feedback.filter(f => f.sessionId === sessionId);
+}
+
+export function getAllSubjects() {
+  return subjects;
+}
+
+export function getSubjectsByTutor(tutorId: string) {
+  return subjects.filter(subject => subject.tutorId === tutorId);
 }
 
 export function addUser(user: User) {

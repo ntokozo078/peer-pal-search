@@ -1,4 +1,3 @@
-
 export type UserRole = "tutor" | "tutee";
 
 export interface User {
@@ -31,7 +30,10 @@ export interface TuteeProfile extends User {
 export interface Subject {
   id: string;
   name: string;
-  level: string; // e.g., "Beginner", "Intermediate", "Advanced"
+  level: string;
+  tutorId: string;
+  hourlyRate: number;
+  description?: string;
 }
 
 export interface Availability {
