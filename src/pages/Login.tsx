@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
-import Button from '@/components/ui/Button';
+import { Button } from '@/components/ui/buttonShadcn';
 import { useAuth } from '@/lib/auth';
 
 const Login: React.FC = () => {
@@ -113,9 +113,9 @@ const Login: React.FC = () => {
               <Button
                 type="submit"
                 className="w-full"
-                isLoading={loading}
+                disabled={loading}
               >
-                Sign in
+                {loading ? 'Signing in...' : 'Sign in'}
               </Button>
             </div>
           </form>

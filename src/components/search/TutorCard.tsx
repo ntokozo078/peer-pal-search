@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { TutorProfile } from '@/types';
-import Button from '@/components/ui/Button';
+import { Button } from '@/components/ui/buttonShadcn';
 
 interface TutorCardProps {
   tutor: TutorProfile;
@@ -81,7 +81,7 @@ const TutorCard: React.FC<TutorCardProps> = ({ tutor }) => {
       </div>
       
       <div className="flex mt-auto p-4 bg-gray-50 border-t border-gray-200">
-        <Link to={`/tutor/${tutor.id}`} className="flex-1 mr-2">
+        <Link to={`/profile/${tutor.id}`} className="flex-1 mr-2">
           <Button variant="outline" className="w-full">
             View Profile
           </Button>

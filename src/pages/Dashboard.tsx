@@ -3,7 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
-import Button from '@/components/ui/Button';
+import { Button } from '@/components/ui/buttonShadcn';
 import { getTutorSessions, getTuteeSessions, getSessionFeedback } from '@/lib/mock-data';
 
 const Dashboard: React.FC = () => {
@@ -64,6 +64,9 @@ const Dashboard: React.FC = () => {
                   <Link to="/resources">
                     <Button variant="outline" className="w-full">Browse Resources</Button>
                   </Link>
+                  <Link to="/messages">
+                    <Button variant="outline" className="w-full">Messages</Button>
+                  </Link>
                 </>
               ) : (
                 <>
@@ -72,6 +75,12 @@ const Dashboard: React.FC = () => {
                   </Link>
                   <Link to="/resources/upload">
                     <Button variant="outline" className="w-full">Upload Resources</Button>
+                  </Link>
+                  <Link to="/messages">
+                    <Button variant="outline" className="w-full">Messages</Button>
+                  </Link>
+                  <Link to="/subject/add">
+                    <Button variant="outline" className="w-full">Add New Subject</Button>
                   </Link>
                 </>
               )}
@@ -160,7 +169,7 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="mt-2">
-                    <Link to="/search">
+                    <Link to="/profile/1">
                       <Button size="sm" className="w-full">View Profile</Button>
                     </Link>
                   </div>
@@ -180,7 +189,7 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                   <div className="mt-2">
-                    <Link to="/search">
+                    <Link to="/profile/2">
                       <Button size="sm" className="w-full">View Profile</Button>
                     </Link>
                   </div>
