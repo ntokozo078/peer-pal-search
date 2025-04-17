@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { tutors, tutees, findUserById, getSessionFeedback } from '@/lib/mock-data';
 import { User, TutorProfile, TuteeProfile, Feedback } from '@/types';
 import { Button } from '@/components/ui/buttonShadcn';
-import { CalendarDaysIcon, BookOpenIcon, UserIcon, AcademicCapIcon, StarIcon } from 'lucide-react';
+import { CalendarDaysIcon, BookOpenIcon, UserIcon, GraduationCap, StarIcon } from 'lucide-react';
 
 const Profile: React.FC = () => {
   const { userId } = useParams();
@@ -170,7 +170,7 @@ const Profile: React.FC = () => {
                     <ul className="mt-2 space-y-1 text-gray-600">
                       {tutorProfile?.qualifications.map((qualification, index) => (
                         <li key={index} className="flex items-center">
-                          <AcademicCapIcon className="h-4 w-4 mr-2 text-primary" />
+                          <GraduationCap className="h-4 w-4 mr-2 text-primary" />
                           {qualification}
                         </li>
                       ))}
