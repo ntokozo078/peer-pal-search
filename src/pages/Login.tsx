@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -112,7 +111,6 @@ const Login: React.FC = () => {
     }
   };
   
-  // Reset form when switching between login and forgot password
   const toggleForgotPassword = () => {
     setError('');
     setForgotPasswordMode(!forgotPasswordMode);
@@ -123,7 +121,6 @@ const Login: React.FC = () => {
     setConfirmPassword('');
   };
   
-  // Helper function to render the back button
   const renderBackButton = () => (
     <Button 
       type="button"
@@ -136,7 +133,6 @@ const Login: React.FC = () => {
     </Button>
   );
   
-  // Render the forgot password form
   if (forgotPasswordMode) {
     return (
       <Layout>
@@ -282,7 +278,6 @@ const Login: React.FC = () => {
     );
   }
   
-  // Render the login form
   return (
     <Layout>
       <div className="flex items-center justify-center min-h-[calc(100vh-13rem)] px-4 py-12 sm:px-6 lg:px-8">

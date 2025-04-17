@@ -1,7 +1,12 @@
 
 import { create } from 'zustand';
 import { User, UserRole } from '@/types';
-import { findUserByEmail } from './mock-data';
+import { 
+  findUserByEmail, 
+  addUser, 
+  addUserCredentials, 
+  findUserCredentials 
+} from './mock-data';
 import { toast } from '@/components/ui/use-toast';
 
 interface AuthState {
@@ -33,11 +38,12 @@ export const useAuth = create<AuthState>((set, get) => ({
     
     try {
       // In a real app, this would make an API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
+      const credentials = findUserCredentials(email);
       const user = findUserByEmail(email);
       
-      if (user && password === 'password') { // In a real app, this would properly verify the password
+      if (user && credentials && credentials.password === password) {
         set({ user, isAuthenticated: true, loading: false });
         toast({
           title: "Login Successful",
@@ -68,7 +74,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     set({ loading: true, error: null });
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       const existingUser = findUserByEmail(email);
       
@@ -91,6 +97,12 @@ export const useAuth = create<AuthState>((set, get) => ({
         createdAt: new Date(),
         bio: '',
       };
+      
+      // Add user to the database
+      addUser(newUser);
+      
+      // Store user credentials for later authentication
+      addUserCredentials(email, password, newUser.id);
       
       set({ user: newUser, isAuthenticated: true, loading: false });
       toast({

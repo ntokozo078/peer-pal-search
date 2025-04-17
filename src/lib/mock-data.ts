@@ -9,6 +9,15 @@ export const sessions: TutorSession[] = [];
 export const resources: Resource[] = [];
 export const feedback: Feedback[] = [];
 
+// Store user credentials for authentication
+interface UserCredential {
+  email: string;
+  password: string;
+  userId: string;
+}
+
+export const userCredentials: UserCredential[] = [];
+
 // Combine tutors and tutees for user operations
 export const allUsers: User[] = [...tutors, ...tutees];
 
@@ -19,6 +28,10 @@ export function findUserById(id: string) {
 
 export function findUserByEmail(email: string) {
   return allUsers.find(user => user.email === email);
+}
+
+export function findUserCredentials(email: string) {
+  return userCredentials.find(cred => cred.email === email);
 }
 
 export function getTutorSessions(tutorId: string) {
@@ -47,6 +60,10 @@ export function addUser(user: User) {
   allUsers.length = 0;
   allUsers.push(...tutors, ...tutees);
   return user;
+}
+
+export function addUserCredentials(email: string, password: string, userId: string) {
+  userCredentials.push({ email, password, userId });
 }
 
 export function updateUser(updatedUser: User) {

@@ -1,8 +1,9 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/buttonShadcn';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth';
 import { UserRole } from '@/types';
 
@@ -14,8 +15,15 @@ const Register: React.FC = () => {
   const [role, setRole] = useState<UserRole>('tutee');
   const [error, setError] = useState('');
   
-  const { register, loading } = useAuth();
+  const { register, loading, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +75,7 @@ const Register: React.FC = () => {
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Full name
                 </label>
-                <input
+                <Input
                   id="name"
                   name="name"
                   type="text"
@@ -75,7 +83,7 @@ const Register: React.FC = () => {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                  className="mt-1"
                   placeholder="Full name"
                 />
               </div>
@@ -84,7 +92,7 @@ const Register: React.FC = () => {
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                   Email address
                 </label>
-                <input
+                <Input
                   id="email"
                   name="email"
                   type="email"
@@ -92,7 +100,7 @@ const Register: React.FC = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                  className="mt-1"
                   placeholder="Email address"
                 />
               </div>
@@ -101,7 +109,7 @@ const Register: React.FC = () => {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <input
+                <Input
                   id="password"
                   name="password"
                   type="password"
@@ -109,7 +117,7 @@ const Register: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                  className="mt-1"
                   placeholder="Password"
                 />
               </div>
@@ -118,7 +126,7 @@ const Register: React.FC = () => {
                 <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
                   Confirm password
                 </label>
-                <input
+                <Input
                   id="confirm-password"
                   name="confirm-password"
                   type="password"
@@ -126,7 +134,7 @@ const Register: React.FC = () => {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="relative block w-full px-3 py-2 text-gray-900 placeholder-gray-500 border border-gray-300 rounded-md appearance-none focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
+                  className="mt-1"
                   placeholder="Confirm password"
                 />
               </div>
