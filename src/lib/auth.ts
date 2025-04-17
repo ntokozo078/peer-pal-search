@@ -5,7 +5,8 @@ import {
   findUserByEmail, 
   addUser, 
   addUserCredentials, 
-  findUserCredentials 
+  findUserCredentials,
+  findUserById
 } from './mock-data';
 import { toast } from '@/components/ui/use-toast';
 
@@ -41,25 +42,31 @@ export const useAuth = create<AuthState>((set, get) => ({
       await new Promise(resolve => setTimeout(resolve, 500));
       
       const credentials = findUserCredentials(email);
-      const user = findUserByEmail(email);
       
-      if (user && credentials && credentials.password === password) {
-        set({ user, isAuthenticated: true, loading: false });
-        toast({
-          title: "Login Successful",
-          description: `Welcome back, ${user.name}!`,
-        });
-        return true;
-      } else {
-        set({ error: 'Invalid email or password', loading: false });
-        toast({
-          title: "Login Failed",
-          description: "Invalid email or password. Please try again.",
-          variant: "destructive"
-        });
-        return false;
+      if (credentials && credentials.password === password) {
+        // Fetch the user data using the userId from credentials
+        const user = findUserById(credentials.userId);
+        
+        if (user) {
+          set({ user, isAuthenticated: true, loading: false });
+          toast({
+            title: "Login Successful",
+            description: `Welcome back, ${user.name}!`,
+          });
+          return true;
+        }
       }
+      
+      // If we reach here, login failed
+      set({ error: 'Invalid email or password', loading: false });
+      toast({
+        title: "Login Failed",
+        description: "Invalid email or password. Please try again.",
+        variant: "destructive"
+      });
+      return false;
     } catch (error) {
+      console.error("Login error:", error);
       set({ error: 'An error occurred during login', loading: false });
       toast({
         title: "Login Error",

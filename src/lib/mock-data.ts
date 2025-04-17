@@ -1,4 +1,3 @@
-
 import { User, TutorProfile, TuteeProfile, Subject, TutorSession, Resource, Feedback } from "@/types";
 
 // Start with empty arrays for all data collections
@@ -16,7 +15,64 @@ interface UserCredential {
   userId: string;
 }
 
-export const userCredentials: UserCredential[] = [];
+export const userCredentials: UserCredential[] = [
+  // Add some test users
+  {
+    email: "test@test.com",
+    password: "password",
+    userId: "user-test-tutor"
+  },
+  {
+    email: "student@test.com",
+    password: "password",
+    userId: "user-test-tutee"
+  },
+  {
+    email: "siyemukelakheswa@gmail.com",
+    password: "password123",
+    userId: "user-siyemukela"
+  }
+];
+
+// Seed some test users
+const testTutor: TutorProfile = {
+  id: "user-test-tutor",
+  email: "test@test.com",
+  name: "Test Tutor",
+  role: "tutor",
+  createdAt: new Date(),
+  bio: "Experienced tutor in mathematics and physics",
+  subjects: ["Mathematics", "Physics"],
+  hourlyRate: 150,
+  availability: ["Monday", "Wednesday", "Friday"],
+  rating: 4.8,
+  sessions: 24,
+};
+
+const testTutee: TuteeProfile = {
+  id: "user-test-tutee",
+  email: "student@test.com",
+  name: "Test Student",
+  role: "tutee",
+  createdAt: new Date(),
+  bio: "Engineering student looking for help with math courses",
+  educationLevel: "Undergraduate",
+  interests: ["Mathematics", "Engineering"],
+};
+
+const siyemukelaUser: User = {
+  id: "user-siyemukela",
+  email: "siyemukelakheswa@gmail.com",
+  name: "Siyemukela",
+  role: "tutee",
+  createdAt: new Date(),
+  bio: "DUT student",
+};
+
+// Add test users to respective arrays
+tutors.push(testTutor);
+tutees.push(testTutee);
+tutees.push(siyemukelaUser as TuteeProfile);
 
 // Combine tutors and tutees for user operations
 export const allUsers: User[] = [...tutors, ...tutees];
@@ -63,7 +119,11 @@ export function addUser(user: User) {
 }
 
 export function addUserCredentials(email: string, password: string, userId: string) {
-  userCredentials.push({ email, password, userId });
+  // Check if credentials already exist
+  const existingCred = userCredentials.find(cred => cred.email === email);
+  if (!existingCred) {
+    userCredentials.push({ email, password, userId });
+  }
 }
 
 export function updateUser(updatedUser: User) {
