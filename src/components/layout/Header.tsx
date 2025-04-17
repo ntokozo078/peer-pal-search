@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth';
 import { LogOut } from 'lucide-react';
 import Button from '@/components/ui/Button';
+import Logo from '@/components/ui/Logo';
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -15,20 +16,13 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-white border-b shadow-sm">
+    <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-sm border-b">
       <div className="container flex items-center justify-between h-16 px-4 mx-auto md:px-6">
         <Link to="/" className="flex items-center">
-          <img 
-            src="/dut-logo.png" 
-            alt="DUT Logo" 
-            className="w-auto h-10 mr-2" 
-          />
-          <span className="hidden text-xl font-bold md:inline-block">
-            DUT Peer Tutoring
-          </span>
+          <Logo />
         </Link>
 
-        <nav className="hidden md:flex items-center space-x-4">
+        <nav className="hidden md:flex items-center space-x-6">
           {isAuthenticated ? (
             <>
               <Link 
@@ -51,15 +45,12 @@ const Header: React.FC = () => {
               >
                 Resources
               </Link>
-              <div className="relative ml-3">
+              <div className="flex items-center gap-6">
                 <Link 
                   to="/profile" 
-                  className="flex items-center"
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                 >
-                  <span className="mr-2 text-sm font-medium text-gray-700">
-                    {user?.name}
-                  </span>
-                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium uppercase text-gray-700">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-xs font-medium uppercase text-white">
                     {user?.profilePicture ? (
                       <img
                         src={user.profilePicture}
@@ -70,27 +61,30 @@ const Header: React.FC = () => {
                       user?.name.charAt(0)
                     )}
                   </div>
+                  <span className="text-sm font-medium text-gray-700">
+                    {user?.name}
+                  </span>
                 </Link>
+                <Button 
+                  onClick={handleLogout} 
+                  variant="outline" 
+                  size="sm"
+                  className="flex items-center gap-2 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Logout
+                </Button>
               </div>
-              <Button 
-                onClick={handleLogout} 
-                variant="outline" 
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </Button>
             </>
           ) : (
             <>
               <Link to="/login">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="hover:bg-primary/5">
                   Log in
                 </Button>
               </Link>
               <Link to="/register">
-                <Button size="sm">
+                <Button size="sm" className="bg-gradient-to-r from-primary to-secondary hover:opacity-90">
                   Sign up
                 </Button>
               </Link>
@@ -99,7 +93,7 @@ const Header: React.FC = () => {
         </nav>
 
         {/* Mobile menu button */}
-        <button className="p-2 md:hidden">
+        <button className="p-2 md:hidden hover:bg-gray-100 rounded-lg transition-colors">
           <svg 
             xmlns="http://www.w3.org/2000/svg" 
             fill="none" 

@@ -1,4 +1,4 @@
-import { User, TutorProfile, TuteeProfile, Subject, TutorSession, Resource, Feedback } from "@/types";
+import { User, TutorProfile, TuteeProfile, Subject, TutorSession, Resource, Feedback, Availability } from "@/types";
 
 // Start with empty arrays for all data collections
 export const subjects: Subject[] = [];
@@ -42,9 +42,29 @@ const testTutor: TutorProfile = {
   role: "tutor",
   createdAt: new Date(),
   bio: "Experienced tutor in mathematics and physics",
-  subjects: ["Mathematics", "Physics"],
+  subjects: [{
+    id: "math-101",
+    name: "Mathematics",
+    description: "Advanced mathematics"
+  }, {
+    id: "phys-101",
+    name: "Physics",
+    description: "Physics fundamentals"
+  }],
   hourlyRate: 150,
-  availability: ["Monday", "Wednesday", "Friday"],
+  availability: [{
+    day: "Monday",
+    startTime: "09:00",
+    endTime: "17:00"
+  }, {
+    day: "Wednesday",
+    startTime: "09:00",
+    endTime: "17:00"
+  }, {
+    day: "Friday",
+    startTime: "09:00",
+    endTime: "17:00"
+  }],
   rating: 4.8,
   sessions: 24,
 };
@@ -57,7 +77,15 @@ const testTutee: TuteeProfile = {
   createdAt: new Date(),
   bio: "Engineering student looking for help with math courses",
   educationLevel: "Undergraduate",
-  interests: ["Mathematics", "Engineering"],
+  interests: [{
+    id: "math-101",
+    name: "Mathematics",
+    description: "Advanced mathematics"
+  }, {
+    id: "eng-101",
+    name: "Engineering",
+    description: "Engineering principles"
+  }],
 };
 
 const siyemukelaUser: User = {
