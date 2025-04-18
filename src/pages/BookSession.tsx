@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -8,6 +7,7 @@ import { TutorProfile, Subject } from '@/types';
 import { Button } from '@/components/ui/buttonShadcn';
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
+import PaymentProcessor from '@/components/payment/PaymentProcessor';
 
 const BookSession: React.FC = () => {
   const { tutorId } = useParams();
@@ -21,7 +21,8 @@ const BookSession: React.FC = () => {
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
   const [mode, setMode] = useState<'online' | 'in-person'>('online');
   const [notes, setNotes] = useState<string>('');
-  const [isBooking, setIsBooking] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [step, setStep] = useState<'details' | 'payment'>('details');
   
   useEffect(() => {
     // Find the tutor based on the ID from URL params
@@ -30,6 +31,11 @@ const BookSession: React.FC = () => {
       setTutor(foundTutor);
     }
   }, [tutorId]);
+  
+  // Get subject object from selected ID
+  const getSelectedSubjectObject = () => {
+    return tutor?.subjects.find(s => s.id === selectedSubject) || null;
+  };
   
   // Redirect if not logged in or not a tutee
   if (!user) {
@@ -108,9 +114,7 @@ const BookSession: React.FC = () => {
     return timeSlots;
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleContinueToPayment = () => {
     if (!selectedSubject || !selectedDate || !selectedTimeSlot) {
       toast({
         title: "Missing Information",
@@ -120,19 +124,11 @@ const BookSession: React.FC = () => {
       return;
     }
     
-    setIsBooking(true);
-    
-    // Simulate booking process
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "Session Requested",
-      description: `Your session with ${tutor.name} has been requested. You'll be notified when they confirm.`,
-      variant: "default"
-    });
-    
-    setIsBooking(false);
-    navigate('/dashboard');
+    setStep('payment');
+  };
+  
+  const handleBackToDetails = () => {
+    setStep('details');
   };
   
   return (
@@ -194,7 +190,7 @@ const BookSession: React.FC = () => {
                       key={subject.id}
                       className="inline-flex items-center px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded"
                     >
-                      {subject.name} ({subject.level})
+                      {subject.name} ({subject.level}) - R{subject.hourlyRate}/hr
                     </span>
                   ))}
                 </div>
@@ -215,149 +211,174 @@ const BookSession: React.FC = () => {
           
           <div className="md:col-span-2">
             <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-xl font-semibold mb-4">Session Details</h2>
-              
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                  <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject
-                    </label>
-                    <select
-                      id="subject"
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
-                      value={selectedSubject}
-                      onChange={(e) => setSelectedSubject(e.target.value)}
-                      required
-                    >
-                      <option value="" disabled>Select a subject</option>
-                      {tutor.subjects.map((subject) => (
-                        <option key={subject.id} value={subject.id}>
-                          {subject.name} ({subject.level})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {step === 'details' ? (
+                <>
+                  <h2 className="text-xl font-semibold mb-4">Session Details</h2>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Session Mode
-                    </label>
-                    <div className="mt-1 flex space-x-4">
-                      <div className="flex items-center">
-                        <input
-                          id="online"
-                          name="session-mode"
-                          type="radio"
-                          checked={mode === 'online'}
-                          onChange={() => setMode('online')}
-                          className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
-                        />
-                        <label htmlFor="online" className="ml-2 block text-sm text-gray-700">
-                          Online
-                        </label>
-                      </div>
-                      <div className="flex items-center">
-                        <input
-                          id="in-person"
-                          name="session-mode"
-                          type="radio"
-                          checked={mode === 'in-person'}
-                          onChange={() => setMode('in-person')}
-                          className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
-                        />
-                        <label htmlFor="in-person" className="ml-2 block text-sm text-gray-700">
-                          In-person
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <form onSubmit={(e) => { e.preventDefault(); handleContinueToPayment(); }} className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Date
+                      <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                        Subject
                       </label>
-                      <div className="border rounded-md p-2">
-                        <Calendar
-                          mode="single"
-                          selected={selectedDate}
-                          onSelect={(date) => {
-                            setSelectedDate(date);
-                            setSelectedTimeSlot('');
-                          }}
-                          disabled={(date) => {
-                            const day = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(date);
-                            return !tutor.availability.some(avail => avail.day === day) || 
-                                  date < new Date(new Date().setHours(0, 0, 0, 0));
-                          }}
-                          className="rounded-md border"
-                        />
-                      </div>
+                      <select
+                        id="subject"
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                        value={selectedSubject}
+                        onChange={(e) => setSelectedSubject(e.target.value)}
+                        required
+                      >
+                        <option value="" disabled>Select a subject</option>
+                        {tutor.subjects.map((subject) => (
+                          <option key={subject.id} value={subject.id}>
+                            {subject.name} ({subject.level}) - R{subject.hourlyRate}/hr
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Time Slot
+                        Session Mode
                       </label>
-                      {selectedDate ? (
-                        getAvailableTimeSlots().length > 0 ? (
-                          <div className="space-y-2 border rounded-md p-4 h-72 overflow-y-auto">
-                            {getAvailableTimeSlots().map((timeSlot, index) => (
-                              <div key={index} className="flex items-center">
-                                <input
-                                  id={`time-slot-${index}`}
-                                  name="time-slot"
-                                  type="radio"
-                                  value={timeSlot}
-                                  checked={selectedTimeSlot === timeSlot}
-                                  onChange={() => setSelectedTimeSlot(timeSlot)}
-                                  className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
-                                />
-                                <label htmlFor={`time-slot-${index}`} className="ml-2 block text-sm text-gray-700">
-                                  {timeSlot}
-                                </label>
-                              </div>
-                            ))}
-                          </div>
+                      <div className="mt-1 flex space-x-4">
+                        <div className="flex items-center">
+                          <input
+                            id="online"
+                            name="session-mode"
+                            type="radio"
+                            checked={mode === 'online'}
+                            onChange={() => setMode('online')}
+                            className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                          />
+                          <label htmlFor="online" className="ml-2 block text-sm text-gray-700">
+                            Online
+                          </label>
+                        </div>
+                        <div className="flex items-center">
+                          <input
+                            id="in-person"
+                            name="session-mode"
+                            type="radio"
+                            checked={mode === 'in-person'}
+                            onChange={() => setMode('in-person')}
+                            className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                          />
+                          <label htmlFor="in-person" className="ml-2 block text-sm text-gray-700">
+                            In-person
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Date
+                        </label>
+                        <div className="border rounded-md p-2">
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate}
+                            onSelect={(date) => {
+                              setSelectedDate(date);
+                              setSelectedTimeSlot('');
+                            }}
+                            disabled={(date) => {
+                              const day = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(date);
+                              return !tutor.availability.some(avail => avail.day === day) || 
+                                    date < new Date(new Date().setHours(0, 0, 0, 0));
+                            }}
+                            className="rounded-md border"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Time Slot
+                        </label>
+                        {selectedDate ? (
+                          getAvailableTimeSlots().length > 0 ? (
+                            <div className="space-y-2 border rounded-md p-4 h-72 overflow-y-auto">
+                              {getAvailableTimeSlots().map((timeSlot, index) => (
+                                <div key={index} className="flex items-center">
+                                  <input
+                                    id={`time-slot-${index}`}
+                                    name="time-slot"
+                                    type="radio"
+                                    value={timeSlot}
+                                    checked={selectedTimeSlot === timeSlot}
+                                    onChange={() => setSelectedTimeSlot(timeSlot)}
+                                    className="h-4 w-4 text-primary border-gray-300 focus:ring-primary"
+                                  />
+                                  <label htmlFor={`time-slot-${index}`} className="ml-2 block text-sm text-gray-700">
+                                    {timeSlot}
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-center h-72 border rounded-md p-4 text-gray-500">
+                              No available time slots for the selected date
+                            </div>
+                          )
                         ) : (
                           <div className="flex items-center justify-center h-72 border rounded-md p-4 text-gray-500">
-                            No available time slots for the selected date
+                            Please select a date first
                           </div>
-                        )
-                      ) : (
-                        <div className="flex items-center justify-center h-72 border rounded-md p-4 text-gray-500">
-                          Please select a date first
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
+                    
+                    <div>
+                      <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
+                        Session Notes (Optional)
+                      </label>
+                      <textarea
+                        id="notes"
+                        rows={3}
+                        className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                        placeholder="Tell your tutor what you'd like to focus on in this session..."
+                        value={notes}
+                        onChange={(e) => setNotes(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="mt-8">
+                      <Button 
+                        type="submit" 
+                        className="w-full"
+                      >
+                        Continue to Payment
+                      </Button>
+                    </div>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-semibold">Payment</h2>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={handleBackToDetails}
+                    >
+                      Edit Details
+                    </Button>
                   </div>
                   
-                  <div>
-                    <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                      Session Notes (Optional)
-                    </label>
-                    <textarea
-                      id="notes"
-                      rows={3}
-                      className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
-                      placeholder="Tell your tutor what you'd like to focus on in this session..."
-                      value={notes}
-                      onChange={(e) => setNotes(e.target.value)}
+                  {selectedSubject && selectedDate && selectedTimeSlot && (
+                    <PaymentProcessor
+                      tutor={tutor}
+                      subject={getSelectedSubjectObject()!}
+                      sessionDate={selectedDate}
+                      sessionTime={selectedTimeSlot}
+                      duration={60} // Default 1 hour
+                      notes={notes}
                     />
-                  </div>
-                </div>
-                
-                <div className="mt-8">
-                  <Button 
-                    type="submit" 
-                    className="w-full"
-                    disabled={isBooking}
-                  >
-                    {isBooking ? 'Requesting Session...' : 'Request Session'}
-                  </Button>
-                </div>
-              </form>
+                  )}
+                </>
+              )}
             </div>
           </div>
         </div>

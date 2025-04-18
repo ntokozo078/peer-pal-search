@@ -1,3 +1,4 @@
+
 export type UserRole = "tutor" | "tutee";
 
 export interface User {
@@ -23,6 +24,7 @@ export interface TutorProfile extends User {
 export interface TuteeProfile extends User {
   role: "tutee";
   interests: Subject[];
+  educationLevel?: string;
   learningPreferences?: string[];
   sessionHistory?: TutorSession[];
 }

@@ -1,3 +1,4 @@
+
 import { User, TutorProfile, TuteeProfile, Subject, TutorSession, Resource, Feedback, Availability } from "@/types";
 
 // Start with empty arrays for all data collections
@@ -41,12 +42,14 @@ const testSubjects: Subject[] = [{
   level: "Advanced",
   tutorId: "user-test-tutor",
   hourlyRate: 150,
+  description: "Advanced mathematics covering calculus, linear algebra, and differential equations."
 }, {
   id: "phys-101",
   name: "Physics",
   level: "Intermediate",
   tutorId: "user-test-tutor",
   hourlyRate: 130,
+  description: "Intermediate physics covering mechanics, thermodynamics, and electromagnetic theory."
 }];
 
 subjects.push(...testSubjects);
@@ -75,7 +78,7 @@ const testTutor: TutorProfile = {
   }],
   rating: 4.8,
   reviewCount: 24,
-  qualifications: ["BSc Mathematics", "MSc Physics"], // Added missing qualifications
+  qualifications: ["BSc Mathematics", "MSc Physics"],
 };
 
 const testTutee: TuteeProfile = {
@@ -202,6 +205,13 @@ export function updateUser(updatedUser: User) {
 
 export function addSubject(subject: Subject) {
   subjects.push(subject);
+  
+  // If the subject is added by a tutor, add it to their profile as well
+  const tutorIndex = tutors.findIndex(t => t.id === subject.tutorId);
+  if (tutorIndex !== -1) {
+    tutors[tutorIndex].subjects.push(subject);
+  }
+  
   return subject;
 }
 
