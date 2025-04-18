@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
@@ -12,6 +11,11 @@ const Resources: React.FC = () => {
   const { user } = useAuth();
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  
+  // Get all available subjects
+  const getAllSubjects = () => {
+    return subjects;
+  };
   
   const availableSubjects = getAllSubjects();
   
@@ -48,7 +52,7 @@ const Resources: React.FC = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Learning Resources</h1>
           {user?.role === 'tutor' && (
-            <Link to="/resources/upload">
+            <Link to="/upload-resource">
               <Button>Upload New Resource</Button>
             </Link>
           )}
@@ -85,7 +89,7 @@ const Resources: React.FC = () => {
                 <option value="all">All Subjects</option>
                 {availableSubjects.map((subject) => (
                   <option key={subject.id} value={subject.id}>
-                    {subject.name} ({subject.level}) - ${subject.hourlyRate}/hr
+                    {subject.name} ({subject.level}) - R{subject.hourlyRate}/hr
                   </option>
                 ))}
               </select>

@@ -5,7 +5,7 @@ import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
 import { subjects } from '@/lib/mock-data';
 import { Button } from '@/components/ui/buttonShadcn';
-import { FileUpIcon } from 'lucide-react';
+import { FileUpIcon, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const ResourceUpload: React.FC = () => {
@@ -60,6 +60,20 @@ const ResourceUpload: React.FC = () => {
     }
   };
   
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
+    }
+  };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -67,6 +81,27 @@ const ResourceUpload: React.FC = () => {
       toast({
         title: "Missing Information",
         description: "Please fill in all fields and select a file",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "File size must be less than 10MB",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check file type
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/zip', 'image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: "Invalid File Type",
+        description: "Please upload a PDF, DOCX, PPT, ZIP, JPEG, or PNG file",
         variant: "destructive"
       });
       return;
@@ -96,6 +131,7 @@ const ResourceUpload: React.FC = () => {
             className="mr-4"
             onClick={() => navigate('/resources')}
           >
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Resources
           </Button>
           <h1 className="text-3xl font-bold">Upload New Resource</h1>
@@ -148,7 +184,7 @@ const ResourceUpload: React.FC = () => {
                   <option value="" disabled>Select a subject</option>
                   {subjects.map((subject) => (
                     <option key={subject.id} value={subject.id}>
-                      {subject.name} ({subject.level})
+                      {subject.name} ({subject.level}) - R{subject.hourlyRate}/hr
                     </option>
                   ))}
                 </select>
@@ -158,7 +194,11 @@ const ResourceUpload: React.FC = () => {
                 <label htmlFor="file" className="block text-sm font-medium text-gray-700 mb-1">
                   Upload File
                 </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                <div 
+                  className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-primary transition-colors"
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
                   <div className="space-y-1 text-center">
                     <FileUpIcon className="mx-auto h-12 w-12 text-gray-400" />
                     <div className="flex text-sm text-gray-600">
@@ -184,7 +224,7 @@ const ResourceUpload: React.FC = () => {
                 </div>
                 {file && (
                   <p className="mt-2 text-sm text-gray-600">
-                    Selected file: {file.name}
+                    Selected file: {file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)
                   </p>
                 )}
               </div>

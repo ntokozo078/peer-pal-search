@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
 import { subjects } from '@/lib/mock-data';
-import { Subject } from '@/types'; // Added import for Subject type
-import { toast } from '@/components/ui/use-toast';
+import { Subject } from '@/types';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Card, 
   CardContent, 
@@ -24,6 +25,8 @@ interface AddSubjectProps {
 
 const AddSubject: React.FC<AddSubjectProps> = ({ onSubjectAdded }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [name, setName] = useState('');
   const [level, setLevel] = useState('Beginner');
   const [description, setDescription] = useState('');
@@ -63,6 +66,7 @@ const AddSubject: React.FC<AddSubjectProps> = ({ onSubjectAdded }) => {
       hourlyRate,
     };
 
+    // Add the new subject to the mock data
     subjects.push(newSubject);
 
     toast({
@@ -74,11 +78,15 @@ const AddSubject: React.FC<AddSubjectProps> = ({ onSubjectAdded }) => {
       onSubjectAdded(newSubject);
     }
 
+    // Clear form and redirect
     setName('');
     setLevel('Beginner');
     setDescription('');
     setHourlyRate(undefined);
     setIsLoading(false);
+    
+    // Redirect to dashboard after success
+    navigate('/dashboard');
   };
 
   return (
@@ -145,17 +153,18 @@ const AddSubject: React.FC<AddSubjectProps> = ({ onSubjectAdded }) => {
                   htmlFor="hourlyRate"
                   className="block text-sm font-medium leading-none peer-disabled:cursor-not-allowed"
                 >
-                  Hourly Rate
+                  Hourly Rate (R)
                 </label>
                 <Input
                   type="number"
                   id="hourlyRate"
-                  placeholder="e.g., 50"
+                  placeholder="e.g., 250"
                   value={hourlyRate}
                   onChange={(e) => setHourlyRate(Number(e.target.value))}
                 />
+                <p className="text-sm text-gray-500 mt-1">Enter amount in South African Rand (ZAR)</p>
               </div>
-              <Button disabled={isLoading}>
+              <Button type="submit" disabled={isLoading}>
                 {isLoading ? 'Adding...' : 'Add Subject'}
               </Button>
             </form>
