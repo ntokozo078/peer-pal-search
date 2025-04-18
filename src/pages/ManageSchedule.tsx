@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
-import { getTutorSessions } from '@/lib/mock-data';
-import { TutorSession } from '@/types';
+import { getTutorSessions, updateUser } from '@/lib/mock-data';
+import { TutorSession, TutorProfile } from '@/types';
 import { Button } from '@/components/ui/buttonShadcn';
 import { CalendarIcon, ClockIcon, CheckIcon, XIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -40,42 +39,33 @@ const ManageSchedule: React.FC = () => {
   
   useEffect(() => {
     if (user && user.role === 'tutor') {
+      const tutorProfile = user as TutorProfile;
       const tutorSessions = getTutorSessions(user.id);
       setSessions(tutorSessions);
       
-      // If this was a real app, we would load the tutor's availability from the backend
-      // For now, we'll just set some arbitrary availability
-      if (user.id === '1') {
-        const mondayAvail = Array(timeSlots.length).fill(false);
-        mondayAvail[8] = true; // 16:00
-        mondayAvail[9] = true; // 17:00
-        mondayAvail[10] = true; // 18:00
-        mondayAvail[11] = true; // 19:00
+      // Load the tutor's availability
+      if (tutorProfile.availability && tutorProfile.availability.length > 0) {
+        const availabilityMap = { ...availability };
         
-        const wednesdayAvail = Array(timeSlots.length).fill(false);
-        wednesdayAvail[7] = true; // 15:00
-        wednesdayAvail[8] = true; // 16:00
-        wednesdayAvail[9] = true; // 17:00
-        wednesdayAvail[10] = true; // 18:00
-        
-        const saturdayAvail = Array(timeSlots.length).fill(false);
-        saturdayAvail[2] = true; // 10:00
-        saturdayAvail[3] = true; // 11:00
-        saturdayAvail[4] = true; // 12:00
-        saturdayAvail[5] = true; // 13:00
-        saturdayAvail[6] = true; // 14:00
-        
-        setAvailability({
-          ...availability,
-          Monday: mondayAvail,
-          Wednesday: wednesdayAvail,
-          Saturday: saturdayAvail,
+        tutorProfile.availability.forEach(avail => {
+          // Convert time string to index in timeSlots
+          const startIndex = timeSlots.findIndex(time => time === avail.startTime);
+          const endIndex = timeSlots.findIndex(time => time === avail.endTime);
+          
+          if (startIndex !== -1 && endIndex !== -1) {
+            for (let i = startIndex; i <= endIndex; i++) {
+              if (availabilityMap[avail.day]) {
+                availabilityMap[avail.day][i] = true;
+              }
+            }
+          }
         });
+        
+        setAvailability(availabilityMap);
       }
     }
   }, [user]);
   
-  // Redirect if not logged in or not a tutor
   if (!user) {
     return (
       <Layout>
@@ -117,16 +107,56 @@ const ManageSchedule: React.FC = () => {
   };
   
   const handleSaveAvailability = async () => {
+    if (!user || user.role !== 'tutor') return;
+    
     setIsSaving(true);
     
-    // Simulate saving
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Convert availability grid to time ranges
+    const availabilityRanges: {day: string, startTime: string, endTime: string}[] = [];
     
-    toast({
-      title: "Availability Updated",
-      description: "Your availability has been successfully updated.",
-      variant: "default"
+    Object.entries(availability).forEach(([day, slots]) => {
+      let startIdx = -1;
+      
+      for (let i = 0; i < slots.length; i++) {
+        // Start of a new range
+        if (slots[i] && startIdx === -1) {
+          startIdx = i;
+        }
+        
+        // End of a range or end of array
+        if ((!slots[i] || i === slots.length - 1) && startIdx !== -1) {
+          const endIdx = slots[i] ? i : i - 1;
+          availabilityRanges.push({
+            day,
+            startTime: timeSlots[startIdx],
+            endTime: timeSlots[endIdx]
+          });
+          startIdx = -1;
+        }
+      }
     });
+    
+    // Update user profile with new availability
+    const updatedUser = {
+      ...(user as TutorProfile),
+      availability: availabilityRanges
+    };
+    
+    const success = updateUser(updatedUser);
+    
+    if (success) {
+      toast({
+        title: "Availability Updated",
+        description: "Your availability has been successfully updated.",
+        variant: "default"
+      });
+    } else {
+      toast({
+        title: "Update Failed",
+        description: "There was an error updating your availability.",
+        variant: "destructive"
+      });
+    }
     
     setIsSaving(false);
   };

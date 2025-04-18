@@ -29,6 +29,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile/:userId" element={<Profile />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/search" element={<Search />} />
         <Route path="/schedule/:tutorId" element={<BookSession />} />
         <Route path="/manage-schedule" element={<ManageSchedule />} />

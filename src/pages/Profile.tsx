@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
-import { findUserById, getSessionFeedback } from '@/lib/mock-data';
+import { findUserById, getSessionFeedback, updateUser } from '@/lib/mock-data';
 import { User, TutorProfile, TuteeProfile, Feedback, Subject } from '@/types';
 import { Button } from '@/components/ui/buttonShadcn';
 import { Input } from '@/components/ui/input';
@@ -52,7 +52,7 @@ const Profile: React.FC = () => {
     
     if (userId) {
       userToShow = findUserById(userId);
-      setIsOwnProfile(false);
+      setIsOwnProfile(user?.id === userId);
     } else if (user) {
       userToShow = user;
       setIsOwnProfile(true);
@@ -79,19 +79,37 @@ const Profile: React.FC = () => {
   const handleSaveProfile = () => {
     if (!profileUser) return;
     
-    // In a real app, this would make an API call to update the profile
-    setProfileUser({
+    // Create updated user object
+    const updatedUser = {
       ...profileUser,
       name: editedName,
       bio: editedBio,
       profilePicture: editedProfilePicture,
-    });
+    };
     
-    setIsEditing(false);
-    toast({
-      title: "Success",
-      description: "Profile updated successfully",
-    });
+    if (profileUser.role === 'tutor') {
+      (updatedUser as TutorProfile).subjects = subjects;
+      (updatedUser as TutorProfile).qualifications = qualifications;
+      (updatedUser as TutorProfile).availability = availability;
+    }
+    
+    // Update user in mock data
+    const success = updateUser(updatedUser);
+    
+    if (success) {
+      setProfileUser(updatedUser);
+      setIsEditing(false);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddSubject = () => {

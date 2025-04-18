@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
-import { subjects } from '@/lib/mock-data';
+import { subjects, addSubject } from '@/lib/mock-data';
 import { Subject } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -66,8 +66,8 @@ const AddSubject: React.FC<AddSubjectProps> = ({ onSubjectAdded }) => {
       hourlyRate,
     };
 
-    // Add the new subject to the mock data
-    subjects.push(newSubject);
+    // Add the new subject to the mock data using the addSubject function
+    addSubject(newSubject);
 
     toast({
       title: 'Success',

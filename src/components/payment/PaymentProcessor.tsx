@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/buttonShadcn';
 import { toast } from '@/components/ui/use-toast';
 import { Subject, TutorProfile } from '@/types';
-import { CreditCard, DollarSign } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface PaymentProcessorProps {
   tutor: TutorProfile;
@@ -30,25 +30,24 @@ const PaymentProcessor: React.FC<PaymentProcessorProps> = ({
   const hours = duration / 60;
   const sessionAmount = subject.hourlyRate * hours;
   
-  const handlePayment = async () => {
+  const handleBooking = async () => {
     setIsProcessing(true);
     
     try {
-      // Simulate payment processing
+      // Simulate booking processing
       setTimeout(() => {
-        // In a real implementation, this would call a Stripe API
         toast({
-          title: 'Payment Successful',
-          description: 'Your payment has been processed successfully',
+          title: 'Booking Successful',
+          description: 'Your tutoring session has been booked successfully',
         });
         
         // Redirect to success page
         navigate('/payment-success');
-      }, 2000);
+      }, 1000);
     } catch (error) {
       toast({
-        title: 'Payment Failed',
-        description: 'There was an error processing your payment. Please try again.',
+        title: 'Booking Failed',
+        description: 'There was an error processing your booking. Please try again.',
         variant: 'destructive',
       });
       setIsProcessing(false);
@@ -57,7 +56,7 @@ const PaymentProcessor: React.FC<PaymentProcessorProps> = ({
   
   return (
     <div className="border rounded-lg p-4 shadow-sm">
-      <h3 className="text-lg font-semibold mb-4">Payment Summary</h3>
+      <h3 className="text-lg font-semibold mb-4">Booking Summary</h3>
       
       <div className="space-y-3 mb-6">
         <div className="flex justify-between">
@@ -82,28 +81,21 @@ const PaymentProcessor: React.FC<PaymentProcessorProps> = ({
         </div>
         <div className="flex justify-between">
           <span>Rate:</span>
-          <span className="font-medium">R{subject.hourlyRate}/hour</span>
+          <span className="font-medium">{formatCurrency(subject.hourlyRate)}/hour</span>
         </div>
         <div className="border-t pt-2 flex justify-between font-semibold">
           <span>Total:</span>
-          <span>R{sessionAmount.toFixed(2)}</span>
+          <span>{formatCurrency(sessionAmount)}</span>
         </div>
       </div>
       
       <div className="space-y-3">
         <Button 
-          onClick={handlePayment} 
+          onClick={handleBooking} 
           className="w-full" 
           disabled={isProcessing}
         >
-          {isProcessing ? (
-            'Processing...'
-          ) : (
-            <>
-              <CreditCard className="mr-2 h-4 w-4" />
-              Pay Now
-            </>
-          )}
+          {isProcessing ? 'Processing...' : 'Book Session'}
         </Button>
         
         <Button 
@@ -114,14 +106,6 @@ const PaymentProcessor: React.FC<PaymentProcessorProps> = ({
         >
           Go Back
         </Button>
-      </div>
-      
-      <div className="mt-4 text-xs text-center text-gray-500">
-        <p>Secure payment processed by Stripe</p>
-        <div className="flex justify-center items-center mt-2">
-          <DollarSign className="h-3 w-3 mr-1" />
-          <span>Your payment information is encrypted and secure</span>
-        </div>
       </div>
     </div>
   );

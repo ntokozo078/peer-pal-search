@@ -1,4 +1,3 @@
-
 import { User, TutorProfile, TuteeProfile, Subject, TutorSession, Resource, Feedback, Availability } from "@/types";
 
 // Start with empty arrays for all data collections
@@ -209,6 +208,9 @@ export function addSubject(subject: Subject) {
   // If the subject is added by a tutor, add it to their profile as well
   const tutorIndex = tutors.findIndex(t => t.id === subject.tutorId);
   if (tutorIndex !== -1) {
+    if (!tutors[tutorIndex].subjects) {
+      tutors[tutorIndex].subjects = [];
+    }
     tutors[tutorIndex].subjects.push(subject);
   }
   
