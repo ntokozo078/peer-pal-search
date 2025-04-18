@@ -1,206 +1,172 @@
-
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
 import { subjects } from '@/lib/mock-data';
+import { Subject } from '@/types'; // Added import for Subject type
+import { toast } from '@/components/ui/use-toast';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/buttonShadcn';
-import { useToast } from '@/hooks/use-toast';
-import { PlusIcon } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
-const levelOptions = ['Beginner', 'Intermediate', 'Advanced'];
+interface AddSubjectProps {
+  onSubjectAdded?: (subject: Subject) => void;
+}
 
-const AddSubject: React.FC = () => {
+const AddSubject: React.FC<AddSubjectProps> = ({ onSubjectAdded }) => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const [subjectName, setSubjectName] = useState('');
-  const [level, setLevel] = useState('');
+  const [name, setName] = useState('');
+  const [level, setLevel] = useState('Beginner');
   const [description, setDescription] = useState('');
-  const [hourlyRate, setHourlyRate] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Redirect if not logged in or not a tutor
-  if (!user) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[calc(100vh-13rem)]">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              You need to be logged in as a tutor to add subjects
-            </h1>
-            <div className="mt-4">
-              <Button onClick={() => navigate('/login')}>Log in</Button>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-  
-  if (user.role !== 'tutor') {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center min-h-[calc(100vh-13rem)]">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              Only tutors can add subjects
-            </h1>
-            <div className="mt-4">
-              <Button onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
-            </div>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-  
+  const [hourlyRate, setHourlyRate] = useState<number | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!subjectName || !level || !hourlyRate || !user) {
+    setIsLoading(true);
+
+    if (!user || user.role !== 'tutor') {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive"
+        title: 'Error',
+        description: 'Only tutors can add subjects.',
+        variant: 'destructive',
       });
+      setIsLoading(false);
       return;
     }
-    
-    const rate = parseFloat(hourlyRate);
-    if (isNaN(rate) || rate <= 0) {
+
+    if (!name || !level || !description || !hourlyRate) {
       toast({
-        title: "Invalid Hourly Rate",
-        description: "Please enter a valid hourly rate",
-        variant: "destructive"
+        title: 'Error',
+        description: 'All fields are required.',
+        variant: 'destructive',
       });
+      setIsLoading(false);
       return;
     }
-    
-    setIsSubmitting(true);
-    
+
     const newSubject: Subject = {
       id: `subject-${Date.now()}`,
-      name: subjectName,
+      name,
       level,
+      description,
       tutorId: user.id,
-      hourlyRate: rate,
-      description: description
+      hourlyRate,
     };
-    
-    // Add to mock data
+
     subjects.push(newSubject);
-    
+
     toast({
-      title: "Subject Added",
-      description: `${subjectName} (${level}) has been added to your profile.`,
+      title: 'Success',
+      description: `${name} added successfully.`,
     });
-    
-    setIsSubmitting(false);
-    navigate('/profile');
+
+    if (onSubjectAdded) {
+      onSubjectAdded(newSubject);
+    }
+
+    setName('');
+    setLevel('Beginner');
+    setDescription('');
+    setHourlyRate(undefined);
+    setIsLoading(false);
   };
-  
+
   return (
     <Layout>
-      <div className="container max-w-2xl px-4 py-8 mx-auto">
-        <div className="flex items-center mb-6">
-          <Button 
-            variant="outline" 
-            className="mr-4"
-            onClick={() => navigate('/profile')}
-          >
-            Back to Profile
-          </Button>
-          <h1 className="text-3xl font-bold">Add New Subject</h1>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <form onSubmit={handleSubmit}>
-            <div className="space-y-6">
+      <div className="container px-4 py-8 mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Add New Subject</CardTitle>
+            <CardDescription>
+              Fill out the form below to add a new subject to the platform.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="subject-name" className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject Name*
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium leading-none peer-disabled:cursor-not-allowed"
+                >
+                  Subject Name
                 </label>
-                <input
-                  id="subject-name"
+                <Input
                   type="text"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
-                  placeholder="E.g., Mathematics, Physics, Programming"
-                  value={subjectName}
-                  onChange={(e) => setSubjectName(e.target.value)}
-                  required
+                  id="name"
+                  placeholder="e.g., Mathematics"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
-              
               <div>
-                <label htmlFor="level" className="block text-sm font-medium text-gray-700 mb-1">
-                  Level*
+                <label
+                  htmlFor="level"
+                  className="block text-sm font-medium leading-none peer-disabled:cursor-not-allowed"
+                >
+                  Level
                 </label>
                 <select
                   id="level"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={level}
                   onChange={(e) => setLevel(e.target.value)}
-                  required
                 >
-                  <option value="" disabled>Select a level</option>
-                  {levelOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
                 </select>
               </div>
-              
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium leading-none peer-disabled:cursor-not-allowed"
+                >
                   Description
                 </label>
-                <textarea
+                <Textarea
                   id="description"
-                  rows={3}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
-                  placeholder="Briefly describe your experience and expertise in this subject..."
+                  placeholder="e.g., A comprehensive introduction to mathematics."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
-              
               <div>
-                <label htmlFor="hourly-rate" className="block text-sm font-medium text-gray-700 mb-1">
-                  Hourly Rate (R)*
+                <label
+                  htmlFor="hourlyRate"
+                  className="block text-sm font-medium leading-none peer-disabled:cursor-not-allowed"
+                >
+                  Hourly Rate
                 </label>
-                <input
-                  id="hourly-rate"
+                <Input
                   type="number"
-                  min="0"
-                  step="10"
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-primary focus:border-primary"
-                  placeholder="E.g., 150"
+                  id="hourlyRate"
+                  placeholder="e.g., 50"
                   value={hourlyRate}
-                  onChange={(e) => setHourlyRate(e.target.value)}
-                  required
+                  onChange={(e) => setHourlyRate(Number(e.target.value))}
                 />
               </div>
-              
-              <div>
-                <p className="text-sm text-gray-500">* Required fields</p>
-              </div>
-            </div>
-            
-            <div className="mt-8">
-              <Button 
-                type="submit" 
-                className="w-full"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Adding Subject...' : 'Add Subject'}
-                {!isSubmitting && <PlusIcon className="ml-1 h-4 w-4" />}
+              <Button disabled={isLoading}>
+                {isLoading ? 'Adding...' : 'Add Subject'}
               </Button>
-            </div>
-          </form>
-        </div>
+            </form>
+          </CardContent>
+          <CardFooter>
+            {isLoading && (
+              <div className="flex items-center text-sm text-muted-foreground">
+                <AlertCircle className="mr-2 h-4 w-4" />
+                Adding subject...
+              </div>
+            )}
+          </CardFooter>
+        </Card>
       </div>
     </Layout>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -102,6 +101,8 @@ const Profile: React.FC = () => {
       id: `subject-${Date.now()}`,
       name: newSubject.name.trim(),
       level: newSubject.level,
+      tutorId: profileUser?.id || '',  // Add required tutorId
+      hourlyRate: 0,  // Add required hourlyRate with default value
     };
     
     setSubjects([...subjects, newSubjectObj]);

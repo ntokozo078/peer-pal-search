@@ -75,6 +75,7 @@ const testTutor: TutorProfile = {
   }],
   rating: 4.8,
   reviewCount: 24,
+  qualifications: ["BSc Mathematics", "MSc Physics"], // Added missing qualifications
 };
 
 const testTutee: TuteeProfile = {
@@ -88,11 +89,17 @@ const testTutee: TuteeProfile = {
   interests: [{
     id: "math-101",
     name: "Mathematics",
-    description: "Advanced mathematics"
+    description: "Advanced mathematics",
+    level: "Advanced",
+    tutorId: "user-test-tutor",
+    hourlyRate: 150
   }, {
     id: "eng-101",
     name: "Engineering",
-    description: "Engineering principles"
+    description: "Engineering principles",
+    level: "Intermediate",
+    tutorId: "user-test-tutor",
+    hourlyRate: 140
   }],
 };
 

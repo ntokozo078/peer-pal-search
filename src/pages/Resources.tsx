@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/lib/auth';
-import { resources, subjects } from '@/lib/mock-data';
+import { resources, subjects, getAllSubjects } from '@/lib/mock-data';
 import { Resource, Subject } from '@/types';
 import { Button } from '@/components/ui/buttonShadcn';
 import { Link } from 'react-router-dom';
