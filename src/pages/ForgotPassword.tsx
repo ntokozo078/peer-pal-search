@@ -14,9 +14,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/buttonShadcn';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { useAuth } from '@/lib/auth';
 
 const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
+  const { forgotPassword, verifyOtp, resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
@@ -28,38 +30,40 @@ const ForgotPassword: React.FC = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call to send OTP to email
-    setTimeout(() => {
+    try {
+      const success = await forgotPassword(email);
+      if (success) {
+        setStep('otp');
+      }
+    } catch (error) {
       toast({
-        title: 'OTP Sent',
-        description: `A verification code has been sent to ${email}`,
+        title: 'Error',
+        description: 'Failed to send OTP. Please try again.',
+        variant: 'destructive',
       });
+    } finally {
       setIsLoading(false);
-      setStep('otp');
-    }, 1500);
+    }
   };
 
   const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call to verify OTP
-    setTimeout(() => {
-      if (otp === '123456') { // Mock verification (in a real app, this would be verified through API)
-        toast({
-          title: 'OTP Verified',
-          description: 'Please set your new password',
-        });
+    try {
+      const success = await verifyOtp(otp);
+      if (success) {
         setStep('reset');
-      } else {
-        toast({
-          title: 'Invalid OTP',
-          description: 'The verification code you entered is incorrect',
-          variant: 'destructive',
-        });
       }
+    } catch (error) {
+      toast({
+        title: 'Invalid OTP',
+        description: 'The verification code you entered is incorrect',
+        variant: 'destructive',
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleResetSubmit = async (e: React.FormEvent) => {
@@ -76,15 +80,20 @@ const ForgotPassword: React.FC = () => {
       return;
     }
 
-    // Simulate API call to reset password
-    setTimeout(() => {
+    try {
+      const success = await resetPassword(password);
+      if (success) {
+        navigate('/login');
+      }
+    } catch (error) {
       toast({
-        title: 'Password Reset Successfully',
-        description: 'You can now log in with your new password',
+        title: 'Error',
+        description: 'Failed to reset password. Please try again.',
+        variant: 'destructive',
       });
+    } finally {
       setIsLoading(false);
-      navigate('/login');
-    }, 1500);
+    }
   };
 
   return (

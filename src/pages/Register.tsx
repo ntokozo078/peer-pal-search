@@ -51,7 +51,6 @@ const Register: React.FC = () => {
       <div className="flex items-center justify-center min-h-[calc(100vh-13rem)] px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8">
           <div>
-            <img className="w-auto h-12 mx-auto" src="/dut-logo.png" alt="DUT Logo" />
             <h2 className="mt-6 text-3xl font-extrabold text-center text-gray-900">
               Create a new account
             </h2>
